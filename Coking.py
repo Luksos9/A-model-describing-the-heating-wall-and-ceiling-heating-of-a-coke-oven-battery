@@ -3,7 +3,7 @@ from fipy import Variable, FaceVariable, CellVariable, Grid1D, ExplicitDiffusion
 from fipy.tools import numerix
 from builtins import range
 
-nx = 50  # L
+nx = 183.  # L
 dx = 1.
 mesh = Grid1D(nx=nx, dx=dx)
 
@@ -11,10 +11,16 @@ phi = CellVariable(name="solution variable",
                    mesh=mesh,
                    value=0.)
 
+""" Lengths of ceiling's layers """
+L1, L2, L3, L4, L5, L6 = 0.27, 0.25, 0.6, 0.45, 0.2, 0.06  # [m] - Length
+""" Thermal conductivities of ceiling's layers """
+k1, k2, k3, k4, k5, k6 = 0.5, 0.9, 0.9, 0.32, 0.6, 1
+
+
 D = 1.  # k/Ro*Cp
 
 valueLeft = 1300  # temp po lewej
-valueRight = 290  # temp po prawej
+valueRight = 330  # temp po prawej
 
 phi.constrain(valueRight, mesh.facesRight)  # zostaw
 phi.constrain(valueLeft, mesh.facesLeft)  # zostaw
@@ -30,7 +36,7 @@ phiAnalytical = CellVariable(name="analytical value",
 
 if __name__ == '__main__':
     viewer = Viewer(vars=(phi, phiAnalytical),
-                    datamin=0., datamax=1400.)  # min i max to wartosci y
+                    datamin=273., datamax=1400.)  # min i max to wartosci y
     viewer.plot()
 
 x = mesh.cellCenters[0]  # wartosci w centrum siatki
@@ -59,8 +65,9 @@ for step in range(steps):
     if __name__ == '__main__':
         viewer.plot()
 
-print(phi.allclose(phiAnalytical, atol = 7e-4))
+print(phi.allclose(phiAnalytical, atol=7e-4))
 
 from fipy import input
+
 if __name__ == '__main__':
     input("Explicit transient diffusion. Press <return> to proceed...")
