@@ -6,7 +6,7 @@ a_sky = 0.8  # dimensionless
 A = 1  # [m2] - area
 T_comb, T1 = 1300, 1300  # [K] - Temperature of coke gas (Also it's T1 - temperature at the surface (gas-ceiling)
 b = 5.67 * 10 ** (-8)  # [W/(m^2*K^4 )] - Stefan Boltzmann constant
-hs = 25  # [W/(m^2*K)] - heat transfer coefficent
+hs = 25  # [W/(m^2*K)] - heat transfer coefficient
 Ta = 308  # [K] - Temperature around surface (air)
 Gs = 1373  # [W/m^2] - radiation
 cos_o = (2 ** 1 / 2) / 2  # degrees
@@ -16,8 +16,8 @@ T_surface = 320  # [K] - assumed ceiling surface temperature (one we want to cal
 
 """ Total Ceiling Resistance made of 6 layers """
 L1, L2, L3, L4, L5, L6 = 0.27, 0.25, 0.6, 0.45, 0.2, 0.06  # [m] - Length
-k1, k2, k3, k4, k5, k6 = 0.5, 0.9, 0.9, 0.32, 0.6, 1  # [] - Thermal conductivity
-R1, R2, R3, R4, R5, R6 = L1 / k1, L2 / k2, L3 / k3, L4 / k4, L5 / k5, L6 / k6  # Resistance
+k1, k2, k3, k4, k5, k6 = 0.5, 0.9, 0.9, 0.32, 0.6, 1  # [W/(m · K)] - Thermal conductivity
+R1, R2, R3, R4, R5, R6 = L1 / k1, L2 / k2, L3 / k3, L4 / k4, L5 / k5, L6 / k6  # [K/W] - Resistance
 R_total = R1 + R2 + R3 + R4 + R5 + R6
 
 """ Energy balance """
