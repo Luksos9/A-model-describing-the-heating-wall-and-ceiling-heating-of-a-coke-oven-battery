@@ -1,44 +1,58 @@
-from fipy import CellVariable, FaceVariable, Grid1D, DiffusionTerm, PowerLawConvectionTerm, ImplicitSourceTerm, Viewer
+from fipy import Variable, FaceVariable, CellVariable, Grid1D, ExplicitDiffusionTerm, TransientTerm, DiffusionTerm, Viewer
 from fipy.tools import numerix
-nx = 100
-dx = 1.0 / nx
+from fipy import input
 
-mesh = Grid1D(nx=nx, dx=dx)
-C = CellVariable(mesh=mesh)
-D = 2.0
-P = 3.0
-C.faceGrad.constrain([0], mesh.facesRight)
+nx = 50
+dx = 1.
+mesh = Grid1D(nx=nx, dx=[0, 0.27, 0.25, 0.6, 0.45, 0.2])
 
-convectionCoeff = FaceVariable(mesh=mesh, value=[P])
-convectionCoeff[..., mesh.facesLeft.value] = 0.
-diffusionCoeff = FaceVariable(mesh=mesh, value=1.)
-diffusionCoeff[..., mesh.facesLeft.value] = 0.
+phi = CellVariable(name="solution variable",
+                   mesh=mesh,
+                   value=0.)
 
-eq = (PowerLawConvectionTerm(coeff=convectionCoeff)
-      == DiffusionTerm(coeff=diffusionCoeff) - ImplicitSourceTerm(coeff=D)
-      - (P * mesh.facesLeft).divergence)
-A = numerix.sqrt(P**2 + 4 * D)
+D = 1.
+
+valueLeft = 1
+valueRight = 0
+
+phi.constrain(valueRight, mesh.facesRight)
+phi.constrain(valueLeft, mesh.facesLeft)
+
+eqX = TransientTerm() == ExplicitDiffusionTerm(coeff=D)
+
+timeStepDuration = 0.9 * dx**2 / (2 * D)
+steps = 100 # krok powinnien byc raczej duzy (0.25 etc)
+
+
+print(mesh)
+
+phiAnalytical = CellVariable(name="analytical value",
+                             mesh=mesh)
+if __name__ == '__main__':
+    viewer = Viewer(vars=(phi, phiAnalytical),
+                    datamin=0., datamax=1.)
+    viewer.plot()
+
 x = mesh.cellCenters[0]
-CAnalytical = CellVariable(mesh=mesh)
-CAnalytical.setValue(2 * P * numerix.exp(P * x / 2)
-                     * ((P + A) * numerix.exp(A / 2 * (1 - x))
-                        - (P - A) * numerix.exp(-A / 2 *(1 - x)))
-                     / ((P + A)**2*numerix.exp(A / 2)
-                        - (P - A)**2 * numerix.exp(-A / 2)))
+t = timeStepDuration * steps
 
-if __name__ == '__main__':
-    C.name = '$C$'
-    CAnalytical.name = '$C_{analytical}$'
-    viewer = Viewer(vars=(C, CAnalytical))
-if __name__ == '__main__':
-    restol = 1e-5
-    anstol = 1e-3
-else:
-    restol = 0.5
-    anstol = 0.15
-res = 1e+10
-while res > restol:
-    res = eq.sweep(var=C)
+try:
+    from scipy.special import erf
+    phiAnalytical.setValue(1 - erf(x / (2 * numerix.sqrt(D * t))))
+except ImportError:
+    print("The SciPy library is not available to test the solution to \
+the transient diffusion equation")
+
+for step in range(steps):
+    eqX.solve(var=phi,
+              dt=timeStepDuration)
     if __name__ == '__main__':
         viewer.plot()
-print(C.allclose(CAnalytical, rtol=anstol, atol=anstol))
+
+print(phi.allclose(phiAnalytical, atol = 7e-4))
+
+if __name__ == '__main__':
+    input("Explicit transient diffusion. Press <return> to proceed...")
+
+
+

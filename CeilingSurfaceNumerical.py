@@ -26,7 +26,7 @@ k1, k2, k3, k4, k5, k6 = 0.5, 0.9, 0.9, 0.32, 0.6, 1
 k_total = k1 * L1_contribution + k2 * L2_contribution + k3 * L3_contribution + \
     k4 * L4_contribution + k5 * L5_contribution + k6 * L6_contribution
 
-""" Densities of of ceiling's layers """
+""" Densities of ceiling's layers """
 Ro_1, Ro_2, Ro_3, Ro_4, Ro_5, Ro_6 = 680, 1000, 1000, 1200, 800, 1000
 # 4. Total density
 Ro_total = Ro_1 * L1_contribution + Ro_2 * L2_contribution + Ro_3 * L3_contribution + \
@@ -39,20 +39,22 @@ C_total = C1 * L1_contribution + C2 * L2_contribution + C3 * L3_contribution + \
     C4 * L4_contribution + C5 * L5_contribution + C6 * L6_contribution
 
 nx = 10
-dx = 1.83
+dx = [0, 0.27, 0.25, 0.6, 0.45, 0.2]  # dx
 mesh = Grid1D(nx=nx, dx=dx)
+print(mesh)
 
 phi = CellVariable(name="solution variable",
                    mesh=mesh,
                    value=0.)
+
 
 D = k_total / (Ro_total * C_total)  # k/Ro*Cp
 
 valueLeft = 1300  # [K] - Left Temperature (where coke gas is burning)
 valueRight = 330  # Right Temperature
 
-phi.constrain(valueRight, mesh.facesRight)  # zostaw
-phi.constrain(valueLeft, mesh.facesLeft)  # zostaw
+phi.constrain(valueRight, mesh.facesRight)
+phi.constrain(valueLeft, mesh.facesLeft)
 
 eqX = TransientTerm() == ExplicitDiffusionTerm(coeff=D)  # zostaw tylko D bedzie trzeba
 
@@ -68,6 +70,7 @@ if __name__ == '__main__':
                     datamin=273., datamax=1400.)  # min i max to wartosci y
     viewer.plot()
 
+
 x = mesh.cellCenters[0]  # wartosci w centrum siatki
 t = timeStepDuration * steps  # maksymalny czas
 
@@ -80,7 +83,7 @@ except ImportError:
     print("The SciPy library is not available to test the solution to \
 the transient diffusion equation")
 
-for step in range(steps):  # do tej petli wrzucic zeby zmienial sie warunek brzegowy
+for step in range(steps):
     eqX.solve(var=phi,
               dt=timeStepDuration)
     if __name__ == '__main__':
