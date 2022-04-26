@@ -38,8 +38,8 @@ C1, C2, C3, C4, C5, C6 = 2340, 1800, 1800, 1900, 1700, 2300
 C_total = C1 * L1_contribution + C2 * L2_contribution + C3 * L3_contribution + \
     C4 * L4_contribution + C5 * L5_contribution + C6 * L6_contribution
 
-nx = 10
-dx = [0, 0.27, 0.25, 0.6, 0.45, 0.2]  # dx
+nx = 50
+dx = 1  # dx
 mesh = Grid1D(nx=nx, dx=dx)
 print(mesh)
 
@@ -51,9 +51,11 @@ phi = CellVariable(name="solution variable",
 D = k_total / (Ro_total * C_total)  # k/Ro*Cp
 
 valueLeft = 1300  # [K] - Left Temperature (where coke gas is burning)
+valueMid = 300  # Right Temperature
 valueRight = 330  # Right Temperature
 
 phi.constrain(valueRight, mesh.facesRight)
+phi.constrain(valueLeft, mesh.facesLeft)
 phi.constrain(valueLeft, mesh.facesLeft)
 
 eqX = TransientTerm() == ExplicitDiffusionTerm(coeff=D)  # zostaw tylko D bedzie trzeba
